@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added `webSearch.enabled` config to disable `web_search` tool registration. Thanks @webwarrior-ws for PR #38 and @knocte for reporting #22.
+- Added `workflow: "auto-summary"` for `web_search` to generate a summary without opening the browser curator. Thanks @Ilm-Alan for PR #57 and @baflow for reporting #32.
 - Added Tavily Search API provider support with `TAVILY_API_KEY` / `tavilyApiKey`, domain filters, recency filters, and auto-provider fallback integration.
 - Added Parallel search provider support, auto-provider fallback integration, and Parallel `fetch_content` extraction fallback.
 - Resolved `web-search.json` from `PI_CODING_AGENT_DIR`, then `XDG_CONFIG_HOME/pi`, before falling back to `~/.pi`.

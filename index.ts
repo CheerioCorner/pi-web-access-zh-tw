@@ -70,6 +70,9 @@ interface WebSearchConfig {
 	workflow?: string;
 	curatorTimeoutSeconds?: unknown;
 	summaryModel?: string;
+	webSearch?: {
+		enabled?: boolean;
+	};
 	shortcuts?: {
 		curate?: string;
 		activity?: string;
@@ -86,8 +89,9 @@ interface ProviderAvailability {
 	gemini: boolean;
 }
 
-type WebSearchWorkflow = "none" | "summary-review";
+type WebSearchWorkflow = "none" | "summary-review" | "auto-summary";
 type CuratorWorkflow = "summary-review";
+type SummaryWorkflow = "summary-review" | "auto-summary";
 
 interface CuratorBootstrap {
 	availableProviders: ProviderAvailability;
@@ -154,8 +158,10 @@ function normalizeCuratorTimeoutSeconds(value: unknown): number | undefined {
 }
 
 function resolveWorkflow(input: unknown, hasUI: boolean): WebSearchWorkflow {
+	const normalized = typeof input === "string" ? input.trim().toLowerCase() : "";
+	if (normalized === "auto-summary") return "auto-summary";
 	if (!hasUI) return "none";
-	if (typeof input === "string" && input.trim().toLowerCase() === "none") return "none";
+	if (normalized === "none") return "none";
 	return "summary-review";
 }
 
@@ -609,7 +615,7 @@ export default function (pi: ExtensionAPI) {
 		inlineContent?: ExtractedContent[];
 		curated?: boolean;
 		curatedFrom?: number;
-		workflow?: CuratorWorkflow;
+		workflow?: SummaryWorkflow;
 		approvedSummary?: string;
 		summaryMeta?: SummaryMeta;
 	}
@@ -1202,11 +1208,11 @@ export default function (pi: ExtensionAPI) {
 		widgetVisible = false;
 	});
 
-	pi.registerTool({
+	if (initConfig.webSearch?.enabled !== false) pi.registerTool({
 		name: "web_search",
 		label: "Web Search",
 		description:
-			`Search the web using OpenAI, Brave, Parallel, Tavily, Exa, Perplexity, or Gemini. Returns an AI-synthesized answer with source citations. OpenAI web_search uses a Codex subscription or OpenAI API key. For comprehensive research, prefer queries (plural) with 2-4 varied angles over a single query — each query gets its own synthesized answer, so varying phrasing and scope gives much broader coverage. When includeContent is true, full page content is fetched in the background. Searches auto-open the interactive browser curator and stream results live; set workflow to "none" to skip curation. Provider auto-selects: OpenAI when suitable and available, then Exa, Brave, Parallel, Tavily, Perplexity, Gemini API, then Gemini Web.`,
+			`Search the web using OpenAI, Brave, Parallel, Tavily, Exa, Perplexity, or Gemini. Returns an AI-synthesized answer with source citations. OpenAI web_search uses a Codex subscription or OpenAI API key. For comprehensive research, prefer queries (plural) with 2-4 varied angles over a single query — each query gets its own synthesized answer, so varying phrasing and scope gives much broader coverage. When includeContent is true, full page content is fetched in the background. Searches auto-open the interactive browser curator and stream results live; set workflow to "none" to skip curation or "auto-summary" for a model-generated summary without the browser curator. Provider auto-selects: OpenAI when suitable and available, then Exa, Brave, Parallel, Tavily, Perplexity, Gemini API, then Gemini Web.`,
 		promptSnippet:
 			"Use for web research questions. Prefer {queries:[...]} with 2-4 varied angles over a single query for broader coverage.",
 		parameters: Type.Object({
@@ -1222,8 +1228,8 @@ export default function (pi: ExtensionAPI) {
 				StringEnum(["auto", "openai", "brave", "parallel", "tavily", "exa", "perplexity", "gemini"], { description: "Search provider (default: auto)" }),
 			),
 			workflow: Type.Optional(
-				StringEnum(["none", "summary-review"], {
-					description: "Search workflow mode: none = no curator, summary-review = open curator with auto summary draft (default)",
+				StringEnum(["none", "summary-review", "auto-summary"], {
+					description: "Search workflow mode: none = no curator, summary-review = open curator with auto summary draft (default), auto-summary = generate summary without opening curator",
 				}),
 			),
 		}),
@@ -1235,7 +1241,7 @@ export default function (pi: ExtensionAPI) {
 			const queryList = normalizeQueryList(rawQueryList);
 			const configWorkflow = loadConfigForExtensionInit().workflow;
 			const workflow = resolveWorkflow(params.workflow ?? configWorkflow, ctx?.hasUI !== false);
-			const shouldCurate = workflow !== "none";
+			const shouldCurate = workflow === "summary-review";
 
 			if (queryList.length === 0) {
 				return {
@@ -1443,12 +1449,40 @@ export default function (pi: ExtensionAPI) {
 				}
 			}
 
+			let approvedSummary: string | undefined;
+			let summaryMeta: SummaryMeta | undefined;
+			if (workflow === "auto-summary") {
+				if (!ctx) {
+					return {
+						content: [{ type: "text", text: "Error: Auto-summary requires an active extension context." }],
+						details: { error: "Missing extension context" },
+					};
+				}
+				onUpdate?.({
+					content: [{ type: "text", text: "Generating summary..." }],
+					details: { phase: "generating-summary", progress: 1 },
+				});
+				const summaryContext: SummaryGenerationContext = {
+					model: ctx.model,
+					modelRegistry: ctx.modelRegistry,
+					cwd: ctx.cwd,
+					isProjectTrusted: () => ctx.isProjectTrusted(),
+				};
+				const summaryModelChoices = await loadSummaryModelChoices(summaryContext);
+				const generated = await generateSummaryDraft(searchResults, summaryContext, signal, summaryModelChoices.defaultSummaryModel ?? undefined);
+				approvedSummary = generated.summary;
+				summaryMeta = generated.meta;
+			}
+
 			return buildSearchReturn({
 				queryList,
 				results: searchResults,
 				urls: allUrls,
 				includeContent: params.includeContent ?? false,
 				inlineContent: allInlineContent.length > 0 ? allInlineContent : undefined,
+				workflow: workflow === "auto-summary" ? "auto-summary" : undefined,
+				approvedSummary,
+				summaryMeta,
 			});
 		},
 
@@ -1508,7 +1542,7 @@ export default function (pi: ExtensionAPI) {
 				shortcut?: string;
 				summary?: {
 					text: string;
-					workflow: CuratorWorkflow;
+					workflow: SummaryWorkflow;
 					model: string | null;
 					durationMs: number;
 					tokenEstimate: number;
@@ -2360,10 +2394,10 @@ export default function (pi: ExtensionAPI) {
 				newWorkflow = "summary-review";
 			} else if (arg === "off") {
 				newWorkflow = "none";
-			} else if (arg === "none" || arg === "summary-review") {
+			} else if (arg === "none" || arg === "summary-review" || arg === "auto-summary") {
 				newWorkflow = arg;
 			} else {
-				ctx.ui.notify(`Unknown option: ${arg}. Use on, off, or summary-review.`, "error");
+				ctx.ui.notify(`Unknown option: ${arg}. Use on, off, summary-review, or auto-summary.`, "error");
 				return;
 			}
 
@@ -2377,7 +2411,9 @@ export default function (pi: ExtensionAPI) {
 
 			const label = newWorkflow === "none"
 				? "Curator disabled — web_search will return raw results"
-				: "Curator enabled — web_search will open curator and auto-generate a summary draft";
+				: newWorkflow === "auto-summary"
+					? "Auto-summary enabled — web_search will generate a summary without opening the curator"
+					: "Curator enabled — web_search will open curator and auto-generate a summary draft";
 			pi.sendMessage({
 				customType: "curator-config",
 				content: [{ type: "text", text: label }],
