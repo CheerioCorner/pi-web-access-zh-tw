@@ -16,12 +16,15 @@
 ## 安裝
 
 ```bash
-# 從本機目錄安裝
+# 直接從 GitHub 安裝（推薦）
+pi install https://github.com/CheerioCorner/pi-web-access-zh-tw
+
+# 或透過 git: 前綴
+pi install git:github.com/CheerioCorner/pi-web-access-zh-tw
+
+# 或從本機目錄安裝
 cd /path/to/pi-web-access-zh-tw
 pi install .
-
-# 或從 GitHub 安裝
-pi install npm:pi-web-access-zh-tw
 ```
 
 ## 使用
@@ -52,15 +55,20 @@ pi install npm:pi-web-access-zh-tw
 當上游釋出新版時：
 
 ```bash
-# 1. 拉取上游最新版
+# 1. 拉取最新版
 git pull origin main
 
-# 2. 套用翻譯 patch
-git apply zh-TW-changes.diff
+# 2. 套用翻譯（會自動翻譯所有 UI 文字與 AI 提示詞）
+node apply-zh-TW.mjs
 
 # 3. 重新安裝
 pi install .
 ```
+
+> 你也可以用傳統方式套用翻譯 patch：
+> ```bash
+> git apply zh-TW-changes.diff
+> ```
 
 ## 授權
 
