@@ -48,11 +48,11 @@ export function generateCuratorPage(
 	const inlineData = safeInlineJSON({ queries, sessionToken, timeout, defaultProvider, searchProvider, summaryModels, defaultSummaryModel, availableProviders });
 
 	return `<!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Curate Search Results</title>
+<title>搜尋結果審閱</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -63,7 +63,7 @@ ${CSS}
 </head>
 <body>
 
-<div class="timer-badge" id="timer" title="Click to adjust">--:--</div>
+<div class="timer-badge" id="timer" title="點擊調整">--:--</div>
 <div class="timer-adjust" id="timer-adjust">
 <input type="text" id="timer-input" value="${timeout}">
 <span class="timer-adjust-label">sec</span>
@@ -72,7 +72,7 @@ ${CSS}
 
 <main>
 <div class="hero" id="hero">
-<div class="hero-kicker">Web Search</div>
+<div class="hero-kicker">網頁搜尋</div>
 <h1 class="hero-title">Searching\u2026</h1>
 <p class="hero-desc">Results will appear below as they complete.</p>
 <div class="hero-meta">
@@ -88,7 +88,7 @@ ${CSS}
 <div class="add-search" id="add-search">
 <span class="add-search-icon">+</span>
 <input type="text" placeholder="Add a search\u2026" id="add-search-input">
-<button type="button" class="add-search-wand" id="add-search-wand" disabled title="Rewrite query with AI">\u2728</button>
+<button type="button" class="add-search-wand" id="add-search-wand" disabled title="使用 AI 改寫查詢">\u2728</button>
 </div>
 
 <section class="summary-panel hidden" id="summary-panel" aria-label="Summary review">
@@ -122,7 +122,7 @@ ${CSS}
 <div class="summary-actions">
 <button class="btn btn-secondary" id="btn-summary-back">Back</button>
 <button class="btn btn-secondary" id="btn-summary-regenerate">Regenerate</button>
-<button class="btn btn-secondary" id="btn-summary-preview" title="Preview rendered summary">Preview</button>
+<button class="btn btn-secondary" id="btn-summary-preview" title="預覽轉譯後的摘要">Preview</button>
 <button class="btn btn-submit" id="btn-summary-approve">Approve</button>
 </div>
 </section>
@@ -157,7 +157,7 @@ ${CSS}
 <div class="preview-modal-inner">
 <div class="preview-modal-header">
 <h2 class="preview-modal-title">Summary Preview</h2>
-<button class="preview-modal-close" id="preview-modal-close" title="Close">\u00d7</button>
+<button class="preview-modal-close" id="preview-modal-close" title="關閉">\u00d7</button>
 </div>
 <div class="preview-modal-body" id="preview-modal-body"></div>
 <div class="preview-popover hidden" id="preview-popover">
@@ -1391,7 +1391,7 @@ const SCRIPT = `(function() {
   var queries = Array.isArray(DATA.queries) ? DATA.queries : [];
   var providers = ["openai", "exa", "brave", "parallel", "tavily", "perplexity", "gemini"];
   var availProviders = DATA.availableProviders && typeof DATA.availableProviders === "object" ? DATA.availableProviders : {};
-  var workflow = "summary-review";
+  var workflow = "摘要審查";
   var initialDefaultProvider = typeof DATA.defaultProvider === "string" ? DATA.defaultProvider : "exa";
   if (providers.indexOf(initialDefaultProvider) === -1) initialDefaultProvider = "exa";
   var initialSearchProvider = typeof DATA.searchProvider === "string" ? DATA.searchProvider.toLowerCase() : initialDefaultProvider;
@@ -1596,7 +1596,7 @@ const SCRIPT = `(function() {
     if (provider === "perplexity") return "Perplexity";
     if (provider === "exa") return "Exa";
     if (provider === "gemini") return "Gemini";
-    return "Unknown";
+    return "未知";
   }
 
   function providerTagHtml(provider) {
@@ -1680,7 +1680,7 @@ const SCRIPT = `(function() {
 
     var autoOption = document.createElement("option");
     autoOption.value = "";
-    autoOption.textContent = "Auto";
+    autoOption.textContent = "自動";
     summaryModelSelect.appendChild(autoOption);
 
     var models = summaryModelsByProvider[provider] || [];
@@ -1737,7 +1737,7 @@ const SCRIPT = `(function() {
       currentSummaryModel = "";
       if (summaryProviderSelect) summaryProviderSelect.innerHTML = "";
       if (summaryModelSelect) {
-        summaryModelSelect.innerHTML = '<option value="">Auto</option>';
+        summaryModelSelect.innerHTML = '<option value="">自動</option>';
         summaryModelSelect.value = "";
       }
       return;
@@ -1857,12 +1857,12 @@ const SCRIPT = `(function() {
     var totalCards = resultCardsEl.querySelectorAll(".result-card").length;
     var searchingCount = totalCards - completedCount;
     if (searchingCount > 0) {
-      heroTitle.textContent = completedCount + " of " + totalCards + " Searches Complete";
+      heroTitle.textContent = completedCount + "/" + totalCards + " 搜尋完成";
     } else {
-      heroTitle.textContent = completedCount + " Search" + (completedCount !== 1 ? "es" : "") + " Complete";
+      heroTitle.textContent = completedCount + " 項搜尋完成";
     }
-    heroDesc.textContent = "Check the results to include, then generate and approve a summary.";
-    if (heroStatus) heroStatus.textContent = completedCount + " completed" + (searchingCount > 0 ? ", " + searchingCount + " searching" : "");
+    heroDesc.textContent = "勾選要包含的結果，然後生成並批准摘要。";
+    if (heroStatus) heroStatus.textContent = completedCount + " 已完成" + (searchingCount > 0 ? "，" + searchingCount + " 搜尋中" : "");
   }
 
   function getSummaryDraftText() {
@@ -1886,7 +1886,7 @@ const SCRIPT = `(function() {
     if (!summaryGeneratingCopy) return;
 
     if (stage !== "generating-summary") {
-      summaryGeneratingCopy.textContent = "Generating summary draft…";
+      summaryGeneratingCopy.textContent = "正在生成摘要草稿…";
       summaryGeneratingPhase = -1;
       if (summaryGeneratingEl) {
         summaryGeneratingEl.removeAttribute("data-phase");
@@ -1904,9 +1904,9 @@ const SCRIPT = `(function() {
 
     summaryGeneratingPhase = nextPhase;
 
-    var phaseLabel = "Planning summary";
-    if (nextPhase === 1) phaseLabel = "Drafting summary";
-    if (nextPhase === 2) phaseLabel = "Polishing summary";
+    var phaseLabel = "規劃摘要";
+    if (nextPhase === 1) phaseLabel = "撰寫摘要";
+    if (nextPhase === 2) phaseLabel = "潤飾摘要";
 
     summaryGeneratingCopy.textContent = summaryPendingModel
       ? phaseLabel + " with " + summaryPendingModel + "…"
@@ -1918,7 +1918,7 @@ const SCRIPT = `(function() {
   }
 
   function updateStageUI() {
-    var showSummary = stage === "summary-review" || stage === "generating-summary" || isRegenerating;
+    var showSummary = stage === "摘要審查" || stage === "generating-summary" || isRegenerating;
     if (summaryPanel) {
       summaryPanel.classList.toggle("hidden", !showSummary);
       summaryPanel.classList.toggle("updating", isRegenerating);
@@ -1927,17 +1927,17 @@ const SCRIPT = `(function() {
       var selCount = getSelectedIndices().length;
       var selLabel = selCount + " selected result" + (selCount !== 1 ? "s" : "");
       if (isRegenerating && stage === "generating-summary") {
-        summarySubtitle.textContent = "Selection changed — regenerating summary…";
+        summarySubtitle.textContent = "選擇已變更 — 正在重新生成摘要…";
       } else if (isRegenerating) {
-        summarySubtitle.textContent = "Selection changed — summary will regenerate shortly…";
+        summarySubtitle.textContent = "選擇已變更 — 摘要即將重新生成…";
       } else if (stage === "generating-summary") {
         summarySubtitle.textContent = summaryPendingModel
-          ? "Summarizing " + selLabel + " with " + summaryPendingModel + "…"
-          : "Summarizing " + selLabel + "…";
+          ? "正在撰寫 " + selLabel + " 的摘要（使用 " + summaryPendingModel + "）…"
+          : "正在撰寫 " + selLabel + " 的摘要…";
       } else if (summaryMeta && summaryMeta.fallbackUsed) {
-        summarySubtitle.textContent = "Fallback summary of " + selLabel + ".";
+        summarySubtitle.textContent = "後備摘要：" + selLabel + "。";
       } else {
-        summarySubtitle.textContent = "Summary of " + selLabel + ". Edit directly, regenerate with feedback, or approve.";
+        summarySubtitle.textContent = "摘要：" + selLabel + "。可直接編輯、提供回饋重新生成，或批准。";
       }
     }
 
@@ -1969,16 +1969,16 @@ const SCRIPT = `(function() {
 
     if (btnSend) {
       if (stage === "generating-summary") {
-        btnSend.textContent = "Generating summary…";
+        btnSend.textContent = "正在生成摘要…";
         btnSend.disabled = true;
       } else if (!inResults) {
-        btnSend.textContent = "Summary ready";
+        btnSend.textContent = "摘要已就緒";
         btnSend.disabled = true;
       } else if (!hasCompleted) {
-        btnSend.textContent = searchesDone ? "No results yet" : "Waiting for results…";
+        btnSend.textContent = searchesDone ? "尚無結果" : "等待結果…";
         btnSend.disabled = true;
       } else {
-        btnSend.textContent = hasSelection ? "Generate summary" : "Select results to summarize";
+        btnSend.textContent = hasSelection ? "生成摘要" : "選擇結果以摘要";
         btnSend.disabled = !canGenerate || !hasSelection;
       }
     }
@@ -2034,13 +2034,13 @@ const SCRIPT = `(function() {
 
     var total = allQueries.length;
     if (total <= 0) {
-      sub.textContent = "Searching\u2026";
+      sub.textContent = "搜尋中\u2026";
       return;
     }
 
     var done = Math.min(completedCount, total);
     var noun = total === 1 ? "query" : "queries";
-    sub.textContent = "Searching " + done + "/" + total + " " + noun + "\u2026";
+    sub.textContent = "搜尋中 " + done + "/" + total + " " + noun + "\u2026";
   }
 
   function syncLoadingPanel() {
@@ -2069,7 +2069,7 @@ const SCRIPT = `(function() {
           '<div class="result-card-meta" style="color:var(--timer-urgent-fg)">Failed</div>' +
         "</div>" +
       "</div>" +
-      '<div class="result-card-error-msg">' + escHtml(errorText || "Search failed") + "</div>";
+      '<div class="result-card-error-msg">' + escHtml(errorText || "搜尋失敗") + "</div>";
   }
 
   function populateResultCard(card, data, queryText, provider) {
@@ -2234,11 +2234,11 @@ const SCRIPT = `(function() {
     if (persist) {
       postJson("/provider", { provider: normalized }).then(function(data) {
         if (data && data.ok === false) {
-          throw new Error(extractServerError(data) || "request rejected");
+          throw new Error(extractServerError(data) || "請求被拒絕");
         }
       }).catch(function(err) {
         var message = err instanceof Error ? err.message : String(err);
-        setError("Failed to save provider preference: " + (message || "unknown error"));
+        setError("儲存提供者偏好失敗：" + (message || "未知錯誤"));
       });
     }
   }
@@ -2312,7 +2312,7 @@ const SCRIPT = `(function() {
               applyResponseToCard(searchingCard, {
                 answer: "",
                 results: [],
-                error: extractServerError(data) || "Search failed",
+                error: extractServerError(data) || "搜尋失敗",
                 provider: provider,
               }, slot.query, provider, slot.slotId);
               return;
@@ -2325,7 +2325,7 @@ const SCRIPT = `(function() {
             applyResponseToCard(searchingCard, {
               answer: "",
               results: [],
-              error: message || "Search failed",
+              error: message || "搜尋失敗",
               provider: provider,
             }, slot.query, provider, slot.slotId);
           })
@@ -2393,7 +2393,7 @@ const SCRIPT = `(function() {
           if (!data || data.ok === false) {
             applyResponseToCard(newCard, {
               answer: "", results: [],
-              error: extractServerError(data) || "Search failed",
+              error: extractServerError(data) || "搜尋失敗",
               provider: altProvider,
             }, altQuery, altProvider, slotId);
             return;
@@ -2404,7 +2404,7 @@ const SCRIPT = `(function() {
           removeSlot(slotId);
           newCard.remove();
           var message = err instanceof Error ? err.message : String(err);
-          setError("Re-search failed: " + (message || "Search failed"));
+          setError("重新搜尋失敗：" + (message || "搜尋失敗"));
           updateSummaryText();
         })
         .finally(function() {
@@ -2433,7 +2433,7 @@ const SCRIPT = `(function() {
       postJson("/rewrite", { query: text })
         .then(function(data) {
           if (!data || data.ok === false) {
-            throw new Error(extractServerError(data) || "Rewrite failed");
+            throw new Error(extractServerError(data) || "改寫失敗");
           }
           var rewritten = typeof data.query === "string" ? data.query.trim() : "";
           if (rewritten) {
@@ -2443,7 +2443,7 @@ const SCRIPT = `(function() {
         })
         .catch(function(err) {
           var message = err instanceof Error ? err.message : String(err);
-          setError("Rewrite failed: " + (message || "unknown error"));
+          setError("改寫失敗：" + (message || "未知錯誤"));
         })
         .finally(function() {
           rewriteInFlight = false;
@@ -2499,7 +2499,7 @@ const SCRIPT = `(function() {
         if (!data || data.ok === false) {
           removeSlot(slotId);
           card.remove();
-          setError("Failed to add search: " + (extractServerError(data) || "Search failed"));
+          setError("新增搜尋失敗：" + (extractServerError(data) || "搜尋失敗"));
           recomputeProviderStates();
           updateSummaryText();
           return;
@@ -2513,7 +2513,7 @@ const SCRIPT = `(function() {
         removeSlot(slotId);
         card.remove();
         var message = err instanceof Error ? err.message : String(err);
-        setError("Failed to add search: " + (message || "Search failed"));
+        setError("新增搜尋失敗：" + (message || "搜尋失敗"));
         recomputeProviderStates();
         updateSummaryText();
       })
@@ -2555,7 +2555,7 @@ const SCRIPT = `(function() {
   }
 
   function submitPayload(payload, successText) {
-    if (submitInFlight) return Promise.reject(new Error("Submit already in progress"));
+    if (submitInFlight) return Promise.reject(new Error("提交進行中"));
     submitInFlight = true;
     submitted = true;
     syncLoadingPanel();
@@ -2565,7 +2565,7 @@ const SCRIPT = `(function() {
     return postJson("/submit", payload)
       .then(function(data) {
         if (data && data.ok === false) {
-          throw new Error(extractServerError(data) || "submit rejected");
+          throw new Error(extractServerError(data) || "提交被拒絕");
         }
         showSuccess(successText);
       })
@@ -2586,7 +2586,7 @@ const SCRIPT = `(function() {
     syncLoadingPanel();
     updateStageUI();
     clearError();
-    showExpired("Time\u2019s up \u2014 submitting current summary state.");
+    showExpired("時間到 — 正在提交目前摘要狀態。");
 
     function finalizeClose() {
       submitInFlight = false;
@@ -2600,7 +2600,7 @@ const SCRIPT = `(function() {
     function attemptCancelFallback(submitErrorMessage) {
       return postJson("/cancel", { reason: "timeout" })
         .catch(function(cancelErr) {
-          console.error("Timeout finalize failed after submit errors:", submitErrorMessage, "| cancel:", toErrorMessage(cancelErr));
+          console.error("逾時最終化失敗（提交錯誤後）：", submitErrorMessage, "| 取消：", toErrorMessage(cancelErr));
         })
         .finally(finalizeClose);
     }
@@ -2608,7 +2608,7 @@ const SCRIPT = `(function() {
     postJson("/submit", payload)
       .then(function(data) {
         if (data && data.ok === false) {
-          throw new Error(extractServerError(data) || "submit rejected");
+          throw new Error(extractServerError(data) || "提交被拒絕");
         }
         finalizeClose();
       })
@@ -2618,7 +2618,7 @@ const SCRIPT = `(function() {
           postJson("/submit", payload)
             .then(function(data) {
               if (data && data.ok === false) {
-                throw new Error(extractServerError(data) || "submit rejected");
+                throw new Error(extractServerError(data) || "提交被拒絕");
               }
               finalizeClose();
             })
@@ -2635,7 +2635,7 @@ const SCRIPT = `(function() {
     var timeoutSelected = getTimeoutSelectedIndices();
     var payload = { selected: timeoutSelected };
     var draft = getSummaryDraftText();
-    if (stage === "summary-review" && draft.length > 0) {
+    if (stage === "摘要審查" && draft.length > 0) {
       payload.summary = draft;
       if (summaryMeta) payload.summaryMeta = summaryMeta;
     }
@@ -2643,10 +2643,10 @@ const SCRIPT = `(function() {
   }
 
   if (queries.length === 0) {
-    heroTitle.textContent = "What do you need?";
-    heroDesc.textContent = "Search for anything below, then generate and approve a summary.";
+    heroTitle.textContent = "您需要什麼？";
+    heroDesc.textContent = "搜尋下方內容，然後生成並批准摘要。";
     if (heroStatus) heroStatus.textContent = "";
-    btnSend.textContent = "No results yet";
+    btnSend.textContent = "尚無結果";
   } else {
     for (var i = 0; i < queries.length; i++) {
       queryIndexToSlot.set(i, i);
@@ -2681,7 +2681,7 @@ const SCRIPT = `(function() {
       return JSON.parse(e.data);
     } catch (err) {
       var message = err instanceof Error ? err.message : String(err);
-      setError("Invalid " + eventName + " event payload: " + (message || "unknown parse error"));
+      setError("無效的 \" + eventName + \" 事件酬載：\" + (message || \"未知解析錯誤\"));
       return null;
     }
   }
@@ -2711,7 +2711,7 @@ const SCRIPT = `(function() {
       queryIndex: data.queryIndex,
       answer: "",
       results: [],
-      error: data.error || "Search failed",
+      error: data.error || "搜尋失敗",
       provider: data.provider,
     }, data.query || queries[data.queryIndex], data.provider, slotId);
   });
@@ -2749,7 +2749,7 @@ const SCRIPT = `(function() {
           return;
         }
         card.classList.toggle("checked", cb.checked);
-        if (stage === "summary-review" || stage === "generating-summary") {
+        if (stage === "摘要審查" || stage === "generating-summary") {
           interruptSummaryIfNeeded();
         }
         updateStageUI();
@@ -2832,10 +2832,10 @@ const SCRIPT = `(function() {
 
   function isSummaryModelSelectionError(message) {
     if (typeof message !== "string") return false;
-    return message.indexOf("Invalid summary model") !== -1
-      || message.indexOf("Summary model not found") !== -1
-      || message.indexOf("No API key available for summary model") !== -1
-      || message.indexOf("Invalid provider") !== -1;
+    return message.indexOf("無效的摘要模型") !== -1
+      || message.indexOf("找不到摘要模型") !== -1
+      || message.indexOf("摘要模型無可用 API 金鑰") !== -1
+      || message.indexOf("無效的提供者") !== -1;
   }
 
   function resetSummaryGeneratingState() {
@@ -2850,7 +2850,7 @@ const SCRIPT = `(function() {
   }
 
   function interruptSummaryIfNeeded() {
-    if (stage !== "generating-summary" && stage !== "summary-review") return;
+    if (stage !== "generating-summary" && stage !== "摘要審查") return;
     if (stage === "generating-summary") {
       cancelInFlightSummaryRequest();
     }
@@ -2876,14 +2876,14 @@ const SCRIPT = `(function() {
     if (submitted || timerExpired || submitInFlight) return;
 
     if (!Array.isArray(indices) || indices.length === 0) {
-      setError("Select at least one result to summarize");
+      setError("請至少選取一個結果來摘要");
       stage = "results";
       updateStageUI();
       return;
     }
 
     if (hasPendingSearchCards()) {
-      setError("Wait for running searches to finish before generating summary");
+      setError("請等待搜尋完成後再生成摘要");
       stage = "results";
       updateStageUI();
       return;
@@ -2913,7 +2913,7 @@ const SCRIPT = `(function() {
       .then(function(data) {
         if (requestId !== summaryRequestSeq) return data;
         if (!data || data.ok === false) {
-          throw new Error(extractServerError(data) || "summary request rejected");
+          throw new Error(extractServerError(data) || "摘要請求被拒絕");
         }
         return data;
       })
@@ -2939,7 +2939,7 @@ const SCRIPT = `(function() {
           return retryData;
         }).catch(function(retryErr) {
           var retryMessage = retryErr instanceof Error ? retryErr.message : String(retryErr);
-          throw new Error(firstMessage + " (auto retry failed: " + (retryMessage || "unknown error") + ")");
+          throw new Error(firstMessage + " (auto retry failed: " + (retryMessage || "未知錯誤") + ")");
         });
       })
       .then(function(data) {
@@ -2960,19 +2960,19 @@ const SCRIPT = `(function() {
         lastAutoSummarySignature = selectionSignature(indices);
         resetSummaryGeneratingState();
         isRegenerating = false;
-        stage = "summary-review";
+        stage = "摘要審查";
         updateStageUI();
       })
       .catch(function(err) {
         if (requestId !== summaryRequestSeq) return;
         var message = err instanceof Error ? err.message : String(err);
-        setError("Failed to generate summary — " + (message || "unknown error"));
+        setError("生成摘要失敗 — " + (message || "未知錯誤"));
         resetSummaryGeneratingState();
         isRegenerating = false;
         if (wasRegenerating && getSummaryDraftText().length > 0) {
-          stage = "summary-review";
+          stage = "摘要審查";
         } else {
-          stage = previousStage === "summary-review" ? "summary-review" : "results";
+          stage = previousStage === "摘要審查" ? "摘要審查" : "results";
         }
         updateStageUI();
       });
@@ -2983,7 +2983,7 @@ const SCRIPT = `(function() {
   }
 
   function maybeAutoGenerateSummary() {
-    if (workflow !== "summary-review") return;
+    if (workflow !== "摘要審查") return;
     if (!searchesDone) return;
     if (stage !== "results") return;
     if (submitted || timerExpired || submitInFlight) return;
@@ -3003,7 +3003,7 @@ const SCRIPT = `(function() {
       if (isRegenerating) {
         isRegenerating = false;
         if (getSummaryDraftText().length > 0) {
-          stage = "summary-review";
+          stage = "摘要審查";
         }
         updateStageUI();
       }
@@ -3015,11 +3015,11 @@ const SCRIPT = `(function() {
   }
 
   function doApprove() {
-    if (submitted || timerExpired || submitInFlight || stage !== "summary-review") return;
+    if (submitted || timerExpired || submitInFlight || stage !== "摘要審查") return;
 
     var selected = getSelectedIndices();
     if (selected.length === 0) {
-      setError("Select at least one result before approving");
+      setError("請至少選取一個結果再批准");
       updateStageUI();
       return;
     }
@@ -3031,10 +3031,10 @@ const SCRIPT = `(function() {
       payload.summaryMeta = normalizeSummaryMeta(summaryMeta, summaryMeta && summaryMeta.edited === true);
     }
 
-    submitPayload(payload, "Summary approved")
+    submitPayload(payload, "摘要已批准")
       .catch(function(err) {
         var message = err instanceof Error ? err.message : String(err);
-        setError("Failed to approve summary — " + (message || "the agent may have moved on"));
+        setError("批准摘要失敗 — " + (message || "代理可能已離開"));
       });
   }
 
@@ -3049,9 +3049,9 @@ const SCRIPT = `(function() {
     postJson("/cancel", { reason: "user" })
       .then(function(data) {
         if (data && data.ok === false) {
-          throw new Error(extractServerError(data) || "cancel rejected");
+          throw new Error(extractServerError(data) || "取消被拒絕");
         }
-        showSuccess("Skipped");
+        showSuccess("已跳過");
       })
       .catch(function(err) {
         submitted = false;
@@ -3059,7 +3059,7 @@ const SCRIPT = `(function() {
         syncLoadingPanel();
         updateStageUI();
         var message = err instanceof Error ? err.message : String(err);
-        setError("Failed to cancel — " + (message || "the agent may have moved on"));
+        setError("取消失敗 — " + (message || "代理可能已離開"));
       });
   }
 
@@ -3072,10 +3072,10 @@ const SCRIPT = `(function() {
     btnSendRaw.addEventListener("click", function() {
       var selected = getSelectedIndices();
       if (selected.length === 0) return;
-      submitPayload({ selected: selected, rawResults: true }, "Results sent")
+      submitPayload({ selected: selected, rawResults: true }, "結果已傳送")
         .catch(function(err) {
           var message = err instanceof Error ? err.message : String(err);
-          setError("Failed to send results — " + (message || "the agent may have moved on"));
+          setError("傳送結果失敗 — " + (message || "代理可能已離開"));
         });
     });
   }
@@ -3086,7 +3086,7 @@ const SCRIPT = `(function() {
         resetTimer();
         return;
       }
-      if (stage !== "summary-review") return;
+      if (stage !== "摘要審查") return;
       clearError();
       stage = "results";
       updateStageUI();
@@ -3109,7 +3109,7 @@ const SCRIPT = `(function() {
       : "<pre>" + escHtml(draft) + "</pre>";
     previewModalBody.innerHTML = sanitizeMarkdownHtml(rendered);
     if (previewModalModel) {
-      previewModalModel.innerHTML = '<option value="">Auto</option>';
+      previewModalModel.innerHTML = '<option value="">自動</option>';
       for (var i = 0; i < summaryModels.length; i++) {
         var m = summaryModels[i];
         var opt = document.createElement("option");
@@ -3314,7 +3314,7 @@ const SCRIPT = `(function() {
     var isSummaryInput = summaryInput && e.target === summaryInput;
     if (isSummaryInput && (e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
-      if (stage === "summary-review") doApprove();
+      if (stage === "摘要審查") doApprove();
       return;
     }
 
@@ -3323,7 +3323,7 @@ const SCRIPT = `(function() {
       if (exitRegeneratingState()) {
         return;
       }
-      if (stage === "summary-review") {
+      if (stage === "摘要審查") {
         stage = "results";
         clearError();
         updateStageUI();
@@ -3343,7 +3343,7 @@ const SCRIPT = `(function() {
     }
 
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-      if (stage !== "summary-review") return;
+      if (stage !== "摘要審查") return;
       e.preventDefault();
       doApprove();
       return;

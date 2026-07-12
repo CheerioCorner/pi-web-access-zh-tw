@@ -1,7 +1,7 @@
 {
-  "name": "pi-web-access",
-  "version": "0.13.0",
-  "description": "Web search, URL fetching, GitHub repo cloning, PDF extraction, YouTube video understanding, and local video analysis for Pi coding agent. Supports OpenAI, Brave, Parallel, Tavily, Exa, Perplexity, and Gemini.",
+  "name": "pi-web-access-zh-tw",
+  "version": "0.13.0-zh-tw.1",
+  "description": "pi-web-access 繁體中文版 — 提供網頁搜尋、URL 擷取、GitHub 倉庫複製、PDF 提取、YouTube 影片理解及本地影片分析功能。支援 OpenAI、Brave、Parallel、Tavily、Exa、Perplexity 及 Gemini。",
   "type": "module",
   "scripts": {
     "test": "node --test"
@@ -12,11 +12,11 @@
     "pi-coding-agent",
     "extension",
     "web-search",
-    "perplexity",
-    "fetch",
-    "scraping"
+    "traditional-chinese",
+    "zh-tw",
+    "localization"
   ],
-  "author": "Nico Bailon",
+  "author": "Nico Bailon (original), @yourname (Traditional Chinese localization)",
   "license": "MIT",
   "repository": {
     "type": "git",
