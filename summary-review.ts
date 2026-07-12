@@ -53,6 +53,7 @@ function summarizeQueryResult(result: QueryResultData): string {
 export function buildSummaryPrompt(results: QueryResultData[], feedback?: string): string {
 	const sections = [
 		"You are writing the final web search summary for a coding assistant.",
+		"Write in Traditional Chinese (zh-TW).",
 		"Write a concise, factual summary using only the provided search results.",
 		"Requirements:",
 		"- Keep it readable and skimmable.",
@@ -90,7 +91,7 @@ function buildDeterministicAnswerPreview(answer: string): string {
 	let text = answer.replace(/\s+/g, " ").trim();
 	if (text.length === 0) return "";
 
-	const sourceMarker = text.search(/\bSources?\s*:/i);
+	const sourceMarker = text.search(/來源|Sources?\s*:/i);
 	if (sourceMarker >= 0) text = text.slice(0, sourceMarker).trim();
 	if (text.length === 0) return "";
 
@@ -100,15 +101,15 @@ function buildDeterministicAnswerPreview(answer: string): string {
 function buildDeterministicSummaryLines(results: QueryResultData[]): string[] {
 	if (results.length === 0) {
 		return [
-			"No completed search results were available when the curator session finished.",
+			"工作階段結束時尚無完成的搜尋結果。",
 			"",
-			"Sources",
-			"- None",
+			"來源",
+			"- 無",
 		];
 	}
 
 	const lines: string[] = [
-		"Summary based on the currently selected search results.",
+		"根據所選搜尋結果的摘要。",
 		"",
 	];
 
@@ -119,16 +120,16 @@ function buildDeterministicSummaryLines(results: QueryResultData[]): string[] {
 	for (const result of results) {
 		if (result.error) {
 			failed += 1;
-			lines.push(`- ${result.query}: failed (${result.error})`);
+			lines.push(`- ${result.query}：失敗（${result.error}）`);
 			continue;
 		}
 
 		successful += 1;
 		const preview = buildDeterministicAnswerPreview(result.answer);
 		if (preview.length > 0) {
-			lines.push(`- ${result.query}: ${preview}`);
+			lines.push(`- ${result.query}：${preview}`);
 		} else {
-			lines.push(`- ${result.query}: returned ${result.results.length} source${result.results.length === 1 ? "" : "s"} without answer text.`);
+			lines.push(`- ${result.query}：已回傳 ${result.results.length} 個來源，無答案文字。`);
 		}
 
 		for (const source of result.results) {
@@ -139,20 +140,20 @@ function buildDeterministicSummaryLines(results: QueryResultData[]): string[] {
 	}
 
 	lines.push("");
-	lines.push(`Completed queries: ${results.length}`);
-	lines.push(`Successful: ${successful}`);
-	lines.push(`Failed: ${failed}`);
+	lines.push(`已完成查詢：${results.length}`);
+	lines.push(`成功：${successful}`);
+	lines.push(`失敗：${failed}`);
 	lines.push("");
-	lines.push("Sources");
+	lines.push("來源");
 
 	if (sourceUrls.length === 0) {
-		lines.push("- None");
+		lines.push("- 無");
 	} else {
 		for (const url of sourceUrls.slice(0, 12)) {
 			lines.push(`- ${url}`);
 		}
 		if (sourceUrls.length > 12) {
-			lines.push(`- ... and ${sourceUrls.length - 12} more`);
+			lines.push(`- ...及其他 ${sourceUrls.length - 12} 個`);
 		}
 	}
 
@@ -163,7 +164,7 @@ export function buildDeterministicSummary(results: QueryResultData[]): { summary
 	const summary = buildDeterministicSummaryLines(results).join("\n").trim();
 	const nonEmptySummary = summary.length > 0
 		? summary
-		: "No completed search results were available when the curator session finished.\n\nSources\n- None";
+		: "工作階段結束時尚無完成的搜尋結果。\n\n來源\n- 無";
 
 	return {
 		summary: nonEmptySummary,

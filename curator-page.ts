@@ -66,24 +66,24 @@ ${CSS}
 <div class="timer-badge" id="timer" title="點擊調整">--:--</div>
 <div class="timer-adjust" id="timer-adjust">
 <input type="text" id="timer-input" value="${timeout}">
-<span class="timer-adjust-label">sec</span>
-<button class="timer-adjust-btn" id="timer-set">Set</button>
+<span class="timer-adjust-label">秒</span>
+<button class="timer-adjust-btn" id="timer-set">設定</button>
 </div>
 
 <main>
 <div class="hero" id="hero">
 <div class="hero-kicker">網頁搜尋</div>
-<h1 class="hero-title">Searching\u2026</h1>
-<p class="hero-desc">Results will appear below as they complete.</p>
+<h1 class="hero-title">搜尋中\u2026</h1>
+<p class="hero-desc">搜尋完成後結果將顯示在下方。</p>
 <div class="hero-meta">
-<span id="hero-status">Searching\u2026</span>
+<span id="hero-status">搜尋中\u2026</span>
 <span class="hero-meta-sep"></span>
 <div class="provider-buttons" id="provider-buttons">${providerButtonsHtml}</div>
 </div>
 </div>
 <div id="result-cards"></div>
 <div class="send-raw-row hidden" id="send-raw-row">
-<button class="btn btn-secondary" id="btn-send-raw" disabled>Send selected results without summary</button>
+<button class="btn btn-secondary" id="btn-send-raw" disabled>發送所選結果（不附摘要）</button>
 </div>
 <div class="add-search" id="add-search">
 <span class="add-search-icon">+</span>
@@ -91,23 +91,23 @@ ${CSS}
 <button type="button" class="add-search-wand" id="add-search-wand" disabled title="使用 AI 改寫查詢">\u2728</button>
 </div>
 
-<section class="summary-panel hidden" id="summary-panel" aria-label="Summary review">
+<section class="summary-panel hidden" id="summary-panel" aria-label="摘要審查">
 <div class="summary-header">
 <div class="summary-header-top">
 <div>
-<h2 class="summary-title">Review summary draft</h2>
-<p class="summary-subtitle" id="summary-subtitle">Edit the summary before approving.</p>
+<h2 class="summary-title">審查摘要草稿</h2>
+<p class="summary-subtitle" id="summary-subtitle">批准前可編輯摘要。</p>
 </div>
 <div class="summary-model-controls">
-<select id="summary-provider-select" class="summary-model-dropdown" aria-label="Summary provider"></select>
-<select id="summary-model-select" class="summary-model-dropdown" aria-label="Summary model"></select>
+<select id="summary-provider-select" class="summary-model-dropdown" aria-label="摘要提供者"></select>
+<select id="summary-model-select" class="summary-model-dropdown" aria-label="摘要模型"></select>
 </div>
 </div>
 </div>
 <div class="summary-generating hidden" id="summary-generating" aria-live="polite">
 <div class="summary-generating-head">
 <span class="summary-generating-orb" aria-hidden="true"></span>
-<span id="summary-generating-copy">Generating summary draft…</span>
+<span id="summary-generating-copy">正在生成摘要草稿…</span>
 </div>
 <div class="summary-generating-bars" aria-hidden="true">
 <span class="summary-generating-bar b1"></span>
@@ -130,33 +130,33 @@ ${CSS}
 
 <footer class="action-bar">
 <div class="action-shortcuts">
-<span class="shortcut"><kbd>A</kbd> <span>Toggle all</span></span>
-<span class="shortcut"><kbd>Enter</kbd> <span>Generate</span></span>
-<span class="shortcut"><kbd>Esc</kbd> <span>Cancel</span></span>
+<span class="shortcut"><kbd>A</kbd> <span>全選/取消</span></span>
+<span class="shortcut"><kbd>Enter</kbd> <span>生成</span></span>
+<span class="shortcut"><kbd>Esc</kbd> <span>取消</span></span>
 </div>
 <div class="action-buttons">
-<button class="btn btn-submit" id="btn-send" disabled>Waiting for results\u2026</button>
+<button class="btn btn-submit" id="btn-send" disabled>等待結果\u2026</button>
 </div>
 </footer>
 
 <div id="success-overlay" class="success-overlay hidden" aria-live="polite">
 <div class="success-icon">OK</div>
-<p id="success-text">Results sent</p>
+<p id="success-text">結果已傳送</p>
 </div>
 
 <div id="expired-overlay" class="expired-overlay hidden" aria-live="polite">
 <div class="expired-content">
 <div class="expired-icon">!</div>
-<h2>Session Ended</h2>
-<p id="expired-text">Time\u2019s up \u2014 sending all results to your agent.</p>
-<div class="expired-countdown">Closing in <span id="close-countdown">5</span>s</div>
+<h2>工作階段已結束</h2>
+<p id="expired-text">時間到 — 正在傳送所有結果給你的代理。</p>
+<div class="expired-countdown">倒數關閉：<span id="close-countdown">5</span> 秒</div>
 </div>
 </div>
 
 <div id="preview-modal" class="preview-modal hidden">
 <div class="preview-modal-inner">
 <div class="preview-modal-header">
-<h2 class="preview-modal-title">Summary Preview</h2>
+<h2 class="preview-modal-title">摘要預覽</h2>
 <button class="preview-modal-close" id="preview-modal-close" title="關閉">\u00d7</button>
 </div>
 <div class="preview-modal-body" id="preview-modal-body"></div>
@@ -166,7 +166,7 @@ ${CSS}
 <button class="btn btn-submit preview-popover-btn" id="preview-popover-regen">Regenerate</button>
 </div>
 <div class="preview-modal-footer">
-<select id="preview-modal-model" class="preview-modal-model" aria-label="Summary model"></select>
+<select id="preview-modal-model" class="preview-modal-model" aria-label="摘要模型"></select>
 <button class="btn btn-secondary" id="preview-modal-regenerate">Regenerate</button>
 <button class="btn btn-submit" id="preview-modal-approve">Approve</button>
 </div>
@@ -1610,7 +1610,7 @@ const SCRIPT = `(function() {
     if (!normalizedProv) return "";
     var altProviders = providers.filter(function(p) { return p !== normalizedProv && availProviders[p] === true; });
     if (altProviders.length === 0) return "";
-    var html = '<div class="card-alt-providers"><span>Also try</span>';
+    var html = '<div class="card-alt-providers"><span>也可以試試</span>';
     for (var ap = 0; ap < altProviders.length; ap++) {
       html += '<button type="button" class="card-alt-chip" data-alt-provider="' + altProviders[ap] + '" data-alt-query="' + escHtml(queryText) + '">' + escHtml(providerLabel(altProviders[ap])) + '</button>';
     }
@@ -2014,8 +2014,8 @@ const SCRIPT = `(function() {
     panel.className = "result-loading";
     panel.innerHTML =
       '<div class="result-loading-header">' +
-        '<div class="result-loading-title">Searching sources</div>' +
-        '<div class="result-loading-sub">Searching\u2026</div>' +
+        '<div class="result-loading-title">正在搜尋來源</div>' +
+        '<div class="result-loading-sub">搜尋中\u2026</div>' +
       '</div>' +
       '<div class="result-loading-grid">' +
         '<div class="loading-card"><div class="loading-card-row long"></div><div class="loading-card-row mid"></div><div class="loading-card-row short"></div></div>' +
@@ -2066,7 +2066,7 @@ const SCRIPT = `(function() {
             '<div class="result-card-query">' + escHtml(queryText) + "</div>" +
             tag +
           "</div>" +
-          '<div class="result-card-meta" style="color:var(--timer-urgent-fg)">Failed</div>' +
+          '<div class="result-card-meta" style="color:var(--timer-urgent-fg)">失敗</div>' +
         "</div>" +
       "</div>" +
       '<div class="result-card-error-msg">' + escHtml(errorText || "搜尋失敗") + "</div>";
@@ -2097,7 +2097,7 @@ const SCRIPT = `(function() {
       bodyHtml += '<div class="result-card-answer">' + sanitizeMarkdownHtml(rendered) + "</div>";
     }
     if (data.results && data.results.length > 0) {
-      bodyHtml += '<div class="result-card-sources"><div class="result-card-sources-title">Sources</div>';
+      bodyHtml += '<div class="result-card-sources"><div class="result-card-sources-title">來源</div>';
       for (var k = 0; k < data.results.length; k++) {
         var r = data.results[k];
         var label = r.title && r.title.indexOf("Source ") !== 0 ? r.title : r.url;
@@ -2294,7 +2294,7 @@ const SCRIPT = `(function() {
                 '<div class="result-card-query">' + escHtml(bq.query) + "</div>" +
                 providerTagHtml(provider) +
               "</div>" +
-              '<div class="result-card-meta"><span class="searching-dots">Searching</span></div>' +
+              '<div class="result-card-meta"><span class="searching-dots">搜尋中</span></div>' +
             "</div>" +
           "</div>" +
           buildAltChipsHtml(provider, bq.query);
@@ -2376,7 +2376,7 @@ const SCRIPT = `(function() {
               '<div class="result-card-query">' + escHtml(altQuery) + "</div>" +
               providerTagHtml(altProvider) +
             "</div>" +
-            '<div class="result-card-meta"><span class="searching-dots">Searching</span></div>' +
+            '<div class="result-card-meta"><span class="searching-dots">搜尋中</span></div>' +
           "</div>" +
         "</div>" +
         buildAltChipsHtml(altProvider, altQuery);
@@ -2483,7 +2483,7 @@ const SCRIPT = `(function() {
             '<div class="result-card-query">' + escHtml(text) + "</div>" +
             providerTagHtml(displayProvider) +
           "</div>" +
-          '<div class="result-card-meta"><span class="searching-dots">Searching</span></div>' +
+          '<div class="result-card-meta"><span class="searching-dots">搜尋中</span></div>' +
         "</div>" +
       "</div>" +
       buildAltChipsHtml(displayProvider, text);
@@ -2661,7 +2661,7 @@ const SCRIPT = `(function() {
               '<div class="result-card-query">' + escHtml(queries[i]) + "</div>" +
               providerTagHtml(initialDefaultProvider) +
             "</div>" +
-            '<div class="result-card-meta"><span class="searching-dots">Searching</span></div>' +
+            '<div class="result-card-meta"><span class="searching-dots">搜尋中</span></div>' +
           "</div>" +
         "</div>" +
         buildAltChipsHtml(initialDefaultProvider, queries[i]);

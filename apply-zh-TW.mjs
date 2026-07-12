@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "fs";
 
 let f = readFileSync("curator-page.ts", "utf8");
 
-// ========== 基本字串取代 ==========
+// ========== 基本字串取代（JS 字串 + HTML 屬性） ==========
 const r = [
   // HTML lang
   ['lang="en"', 'lang="zh-TW"'],
@@ -11,7 +11,7 @@ const r = [
   ["<title>Curate Search Results</title>", "<title>搜尋結果審閱</title>"],
   // Hero
   ["Web Search", "網頁搜尋"],
-  // 按鈕
+  // 按鈕 (JS 字串)
   ['"Generate"', '"生成"'],
   ['"Cancel"', '"取消"'],
   ['"Approve"', '"批准"'],
@@ -82,16 +82,51 @@ for (const [a, b] of r) {
   f = f.replaceAll(a, b);
 }
 
+// ========== HTML 範本文字（無引號的 HTML 內容） ==========
+const htmlR = [
+  // Hero 區域
+  ['<h1 class="hero-title">Searching\\u2026</h1>', '<h1 class="hero-title">搜尋中\\u2026</h1>'],
+  ['<p class="hero-desc">Results will appear below as they complete.</p>', '<p class="hero-desc">搜尋完成後結果將顯示在下方。</p>'],
+  ['<span id="hero-status">Searching\\u2026</span>', '<span id="hero-status">搜尋中\\u2026</span>'],
+  // 摘要面板
+  ['<h2 class="summary-title">Review summary draft</h2>', '<h2 class="summary-title">審查摘要草稿</h2>'],
+  ['<p class="summary-subtitle" id="summary-subtitle">Edit the summary before approving.</p>', '<p class="summary-subtitle" id="summary-subtitle">批准前可編輯摘要。</p>'],
+  ['<span id="summary-generating-copy">Generating summary draft…</span>', '<span id="summary-generating-copy">正在生成摘要草稿…</span>'],
+  // 成功/逾時覆層
+  ['<p id="success-text">Results sent</p>', '<p id="success-text">結果已傳送</p>'],
+  ['<h2>Session Ended</h2>', '<h2>工作階段已結束</h2>'],
+  ['<div class="expired-countdown">Closing in <span id="close-countdown">5</span>s</div>', '<div class="expired-countdown">倒數關閉：<span id="close-countdown">5</span> 秒</div>'],
+  // 預覽模態
+  ['<h2 class="preview-modal-title">Summary Preview</h2>', '<h2 class="preview-modal-title">摘要預覽</h2>'],
+  // 計時器
+  ['<span class="timer-adjust-label">sec</span>', '<span class="timer-adjust-label">秒</span>'],
+  ['<button class="timer-adjust-btn" id="timer-set">Set</button>', '<button class="timer-adjust-btn" id="timer-set">設定</button>'],
+  // 快捷鍵
+  ['<span class="shortcut"><kbd>A</kbd> <span>Toggle all</span></span>', '<span class="shortcut"><kbd>A</kbd> <span>全選/取消</span></span>'],
+  ['<span class="shortcut"><kbd>Enter</kbd> <span>Generate</span></span>', '<span class="shortcut"><kbd>Enter</kbd> <span>生成</span></span>'],
+  ['<span class="shortcut"><kbd>Esc</kbd> <span>Cancel</span></span>', '<span class="shortcut"><kbd>Esc</kbd> <span>取消</span></span>'],
+  // 按鈕
+  ['<button class="btn btn-submit" id="btn-send" disabled>Waiting for results\\u2026</button>', '<button class="btn btn-submit" id="btn-send" disabled>等待結果\\u2026</button>'],
+  ['<button class="btn btn-secondary" id="btn-send-raw" disabled>Send selected results without summary</button>', '<button class="btn btn-secondary" id="btn-send-raw" disabled>發送所選結果（不附摘要）</button>'],
+  // Aria-labels
+  ['aria-label="Summary review"', 'aria-label="摘要審查"'],
+  ['aria-label="Summary provider"', 'aria-label="摘要提供者"'],
+  ['aria-label="Summary model"', 'aria-label="摘要模型"'],
+];
+
+for (const [a, b] of htmlR) {
+  f = f.replaceAll(a, b);
+}
+
 // ========== 特殊模式：動態模板字串 ==========
 
 // "Searching…" status
 f = f.replaceAll('"Searching\u2026"', '"搜尋中\u2026"');
 
-// "Searches Complete" — happens in template literals
-// Pattern: `${completedCount}/${totalCards} Searches Complete` and `${completedCount} Searches Complete`
+// "Searches Complete"
 f = f.replaceAll('Searches Complete', '搜尋完成');
 
-// Search status: "completed" and "searching" in heroStatus
+// Search status
 f = f.replaceAll('" completed"', '" 已完成"');
 f = f.replaceAll('" searching"', '" 搜尋中"');
 
@@ -103,14 +138,13 @@ f = f.replaceAll('"Selection changed — summary will be regenerated\u2026"', '"
 f = f.replaceAll('"Fallback summary of "', '"後備摘要："');
 f = f.replaceAll('"Summary of "', '"摘要："');
 
-// " of " in counts
-// This is tricky — need to be more specific
+// " of "
 f = f.replaceAll('" of "', '" 的 "');
 
-// "queries" in dynamic text
+// "queries"
 f = f.replaceAll('" queries"', '" 個查詢"');
 
-// "s left" in timer
+// "s left"
 f = f.replaceAll('"s left"', '" 秒"');
 
 // Hero description
@@ -118,6 +152,23 @@ f = f.replaceAll(
   '"Check the results to include, then generate and approve a summary."',
   '"勾選要包含的結果，然後生成並批准摘要。"'
 );
+
+// ========== JS 範本字串內容（建構 HTML 的 JS 程式碼） ==========
+
+// "Searching sources" / "Searching..." in result loading
+f = f.replaceAll("Searching sources</div>", "正在搜尋來源</div>");
+
+// "Also try" in alt providers
+f = f.replaceAll(">Also try<", ">也可以試試<");
+
+// "Failed" in result card meta
+f = f.replaceAll(">Failed<", ">失敗<");
+
+// "Sources" in result card sources title
+f = f.replaceAll(">Sources<", ">來源<");
+
+// "Searching" in result card meta (4 occurrences in searching-dots span)
+f = f.replaceAll('<span class="searching-dots">Searching</span>', '<span class="searching-dots">搜尋中</span>');
 
 writeFileSync("curator-page.ts", f, "utf8");
 console.log("✅ 翻譯完成！");
